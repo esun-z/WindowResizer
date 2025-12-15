@@ -102,7 +102,7 @@ class WindowResizer(QMainWindow):
             QMessageBox.warning(self, "Invalid Input", "Width and Height must be integers.")
             return
 
-        width, height = int(width), int(height)
+        target_width, target_height = int(width), int(height)
 
         hwnd = None
         if title:
@@ -111,9 +111,25 @@ class WindowResizer(QMainWindow):
             hwnd = self.find_window_by_process(process_name)
 
         if hwnd:
+            # Get current window and client area dimensions
             rect = win32gui.GetWindowRect(hwnd)
-            # self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
-            win32gui.MoveWindow(hwnd, rect[0], rect[1], width, height, True)
+            client_rect = win32gui.GetClientRect(hwnd)
+
+            outer_width = rect[2] - rect[0]
+            outer_height = rect[3] - rect[1]
+            client_width = client_rect[2] - client_rect[0]
+            client_height = client_rect[3] - client_rect[1]
+
+            # Calculate border and title bar sizes
+            border_width = (outer_width - client_width) // 2
+            title_bar_height = outer_height - client_height - border_width
+
+            # Calculate new outer dimensions
+            new_width = target_width + 2 * border_width
+            new_height = target_height + title_bar_height + border_width
+
+            # Move and resize the window
+            win32gui.MoveWindow(hwnd, rect[0], rect[1], new_width, new_height, True)
             self.update_current_resolution()
         else:
             QMessageBox.warning(self, "Window Not Found", "Could not find the target window.")
@@ -150,7 +166,7 @@ class WindowResizer(QMainWindow):
             hwnd = self.find_window_by_process(process_name)
 
         if hwnd:
-            rect = win32gui.GetWindowRect(hwnd)
+            rect = win32gui.GetClientRect(hwnd)
             self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
         else:
             self.current_resolution_label.setText("Current Resolution: N/A")
