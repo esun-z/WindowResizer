@@ -5,6 +5,7 @@ from PySide6.QtCore import Qt, QEvent
 import win32gui
 import win32process
 import win32con
+import os
 
 class WindowResizer(QMainWindow):
     def __init__(self):
@@ -118,14 +119,20 @@ class WindowResizer(QMainWindow):
 
     def find_window_by_process(self, process_name):
         def callback(hwnd, extra):
+            if not win32gui.IsWindowVisible(hwnd):
+                return
+
             _, pid = win32process.GetWindowThreadProcessId(hwnd)
             try:
-                handle = win32process.OpenProcess(win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid)
-                exe_name = win32process.GetModuleFileNameEx(handle, 0)
-                if process_name.lower() in exe_name.lower():
+                handle = win32process.OpenProcess(
+                    win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid
+                )
+                exe_path = win32process.GetModuleFileNameEx(handle, 0)
+                exe_name = os.path.basename(exe_path).lower()
+                if process_name.lower() == exe_name:
                     extra.append(hwnd)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Error accessing process {pid}: {e}")
 
         hwnds = []
         win32gui.EnumWindows(callback, hwnds)
