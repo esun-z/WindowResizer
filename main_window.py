@@ -1,88 +1,45 @@
-from PySide6.QtWidgets import (QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox, QHBoxLayout, QFileDialog)
+from PySide6.QtWidgets import (QMainWindow, QListWidgetItem, QMessageBox, QFileDialog)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap, QColor
 import win32gui
 import win32ui
 import ctypes
 from ui_main_window import Ui_main_window as ui
 from utils import find_window_by_process
 from presets import presets
+from log_level import LogLevel
 
 class MainWindow(QMainWindow, ui):
+
+    MAX_LOGS = 1000
+
     def __init__(self):
         super().__init__()
         self.setupUi(self)
-        # self.setWindowTitle("Window Resizer")
-        # self.setGeometry(100, 100, 600, 400)  # Adjusted width for screenshot preview
-
-        # # Main layout
-        # layout = QVBoxLayout()
-
-        # # Input fields for title and process name
-        # input_layout = QVBoxLayout()
-
-        # self.title_input = QLineEdit(self)
-        # self.title_input.setPlaceholderText("Enter Window Title")
-        # input_layout.addWidget(self.title_input)
-
-        # self.process_input = QLineEdit(self)
-        # self.process_input.setPlaceholderText("Enter Process Name")
-        # input_layout.addWidget(self.process_input)
-
-        # layout.addLayout(input_layout)
-
-        # # Single Detect button
-        # self.detect_button = QPushButton("Detect", self)
         self.detect_button.clicked.connect(self.update_current_resolution)
-        # layout.addWidget(self.detect_button)
-
-        # # Label to show current resolution
-        # self.current_resolution_label = QLabel("Current Resolution: N/A", self)
-        # layout.addWidget(self.current_resolution_label)
-
-        # # Screenshot preview and buttons
-        # self.screenshot_label = QLabel("Screenshot Preview", self)
-        # self.screenshot_label.setFixedSize(200, 150)
-        # layout.addWidget(self.screenshot_label)
-
-        # screenshot_buttons_layout = QHBoxLayout()
-        # self.screenshot_button = QPushButton("Take Screenshot", self)
+        self.apply_button.clicked.connect(self.apply_resolution)
         self.screenshot_button.clicked.connect(self.take_screenshot)
-        # screenshot_buttons_layout.addWidget(self.screenshot_button)
-
-        # self.save_button = QPushButton("Save As...", self)
         self.save_button.clicked.connect(self.save_screenshot)
-        # screenshot_buttons_layout.addWidget(self.save_button)
 
-        # layout.addLayout(screenshot_buttons_layout)
-
-        # # Input fields for target resolution
-        # self.width_input = QLineEdit(self)
-        # self.width_input.setPlaceholderText("Width")
-        # layout.addWidget(self.width_input)
-
-        # self.height_input = QLineEdit(self)
-        # self.height_input.setPlaceholderText("Height")
-        # layout.addWidget(self.height_input)
-
-        # # Preset resolutions
-        # self.preset_combo = QComboBox(self)
         self.preset_combo.addItems(presets.keys())
         self.preset_combo.currentIndexChanged.connect(self.apply_preset)
-        # layout.addWidget(self.preset_combo)
 
-        # # Apply button
-        # self.apply_button = QPushButton("Apply Resolution", self)
-        self.apply_button.clicked.connect(self.apply_resolution)
-        # layout.addWidget(self.apply_button)
-
-        # # Set central widget
-        # central_widget = QWidget()
-        # central_widget.setLayout(layout)
-        # self.setCentralWidget(central_widget)
-
-        # Placeholder for screenshot pixmap
         self.screenshot_pixmap = None
+
+    def log(self, message, level=LogLevel.INFO):
+        if self.log_list.count() >= self.MAX_LOGS:
+            self.log_list.takeItem(0)
+
+        log_message = f"[{level.name}] {message}"
+        item = QListWidgetItem(log_message)
+        # Use QColor with alpha for transparency (128 = 50%)
+        if level == LogLevel.WARNING:
+            item.setBackground(QColor(255, 255, 0, 128))  # yellow, 50% transparent
+        elif level == LogLevel.ERROR:
+            item.setBackground(QColor(255, 165, 0, 128))  # orange, 50% transparent
+
+        self.log_list.addItem(item)
+        self.log_list.scrollToBottom()
 
     def apply_preset(self):
         preset = self.preset_combo.currentText()
@@ -90,6 +47,9 @@ class MainWindow(QMainWindow, ui):
             width, height = presets[preset]
             self.width_input.setText(str(width))
             self.height_input.setText(str(height))
+            self.log(f"Applied preset: {preset} ({width}x{height})")
+        else:
+            self.log(f"Preset '{preset}' not found.", LogLevel.WARNING)
 
     def apply_resolution(self):
         title = self.title_input.text()
@@ -98,7 +58,7 @@ class MainWindow(QMainWindow, ui):
         height = self.height_input.text()
 
         if not width.isdigit() or not height.isdigit():
-            QMessageBox.warning(self, "Invalid Input", "Width and Height must be integers.")
+            self.log("Width and Height must be numeric values.", LogLevel.ERROR)
             return
 
         target_width, target_height = int(width), int(height)
@@ -131,7 +91,7 @@ class MainWindow(QMainWindow, ui):
             win32gui.MoveWindow(hwnd, rect[0], rect[1], new_width, new_height, True)
             self.update_current_resolution()
         else:
-            QMessageBox.warning(self, "Window Not Found", "Could not find the target window.")
+            self.log("Could not find the target window.", LogLevel.ERROR)
 
     def update_current_resolution(self):
         title = self.title_input.text()
@@ -146,8 +106,10 @@ class MainWindow(QMainWindow, ui):
         if hwnd:
             rect = win32gui.GetClientRect(hwnd)
             self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
+            self.log(f"Current resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
         else:
             self.current_resolution_label.setText("Current Resolution: N/A")
+            self.log("Could not find the target window.", LogLevel.WARNING)
 
     def take_screenshot(self):
         title = self.title_input.text()
@@ -160,7 +122,7 @@ class MainWindow(QMainWindow, ui):
             hwnd = find_window_by_process(process_name)
 
         if not hwnd:
-            QMessageBox.warning(self, "Window Not Found", "Could not find the target window.")
+            self.log("Could not find the target window for screenshot.", LogLevel.ERROR)
             return
 
         # Get client area size
@@ -169,7 +131,7 @@ class MainWindow(QMainWindow, ui):
         height = client_rect[3] - client_rect[1]
 
         if width <= 0 or height <= 0:
-            QMessageBox.warning(self, "Invalid Window", "Client area has zero size.")
+            self.log("Client area has zero size.", LogLevel.ERROR)
             return
 
         try:
@@ -188,7 +150,7 @@ class MainWindow(QMainWindow, ui):
             result = ctypes.windll.user32.PrintWindow(hwnd, compatible_dc.GetSafeHdc(), 3)
 
             if not result:
-                QMessageBox.warning(self, "Screenshot Failed", "PrintWindow failed to capture the client area.")
+                self.log("PrintWindow failed to capture the client area.", LogLevel.ERROR)
                 return
 
             # Save to file
@@ -204,6 +166,8 @@ class MainWindow(QMainWindow, ui):
                 )
             )
 
+            self.log("Screenshot taken successfully.")
+
         finally:
             # Cleanup resources
             win32gui.DeleteObject(bitmap.GetHandle())
@@ -216,8 +180,9 @@ class MainWindow(QMainWindow, ui):
             file_path, _ = QFileDialog.getSaveFileName(self, "Save Screenshot", "", "Images (*.png *.xpm *.jpg *.bmp)")
             if file_path:
                 self.screenshot_pixmap.save(file_path)
+                self.log(f"Screenshot saved to {file_path}.")
         else:
-            QMessageBox.warning(self, "No Screenshot", "No screenshot available to save.")
+            self.log("No screenshot available to save.", LogLevel.WARNING)
 
 if __name__ == "__main__":
     import sys

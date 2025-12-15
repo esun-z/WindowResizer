@@ -14,137 +14,166 @@
    <string>Window Resizer</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QGroupBox" name="window_group">
-        <property name="title">
-         <string>Window</string>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="window_group">
+          <property name="title">
+           <string>Window</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
-            <widget class="QLineEdit" name="title_input">
-             <property name="placeholderText">
-              <string>Enter Window Title</string>
-             </property>
-            </widget>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QLineEdit" name="title_input">
+               <property name="placeholderText">
+                <string>Enter Window Title</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="process_input">
+               <property name="placeholderText">
+                <string>Enter Process Name</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item>
-            <widget class="QLineEdit" name="process_input">
-             <property name="placeholderText">
-              <string>Enter Process Name</string>
+            <widget class="QPushButton" name="detect_button">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Detect</string>
              </property>
             </widget>
            </item>
           </layout>
-         </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="resize_group">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Resize</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="QLabel" name="current_resolution_label">
+             <property name="text">
+              <string>Current Resolution: N/A</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="target_resolution_label">
+             <property name="text">
+              <string>Target Resolution:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLineEdit" name="width_input">
+               <property name="placeholderText">
+                <string>Width</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="x_label">
+               <property name="toolTip">
+                <string/>
+               </property>
+               <property name="text">
+                <string>x</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="height_input">
+               <property name="placeholderText">
+                <string>Height</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QComboBox" name="preset_combo">
+             <property name="placeholderText">
+              <string>Select Preset</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="apply_button">
+             <property name="text">
+              <string>Apply</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="screenshot_group">
+          <property name="title">
+           <string>Screenshot</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QPushButton" name="screenshot_button">
+             <property name="text">
+              <string>Take Screenshot</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="save_button">
+             <property name="text">
+              <string>Save As...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="preview_group">
+        <property name="title">
+         <string>Screenshot Preview</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QPushButton" name="detect_button">
+          <widget class="QLabel" name="screenshot_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="text">
-            <string>Detect</string>
+            <string>Screenshot Preview</string>
            </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="resize_group">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="title">
-         <string>Resize</string>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="QLabel" name="current_resolution_label">
-           <property name="text">
-            <string>Current Resolution: N/A</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="target_resolution_label">
-           <property name="text">
-            <string>Target Resolution:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <widget class="QLineEdit" name="width_input">
-             <property name="placeholderText">
-              <string>Width</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="x_label">
-             <property name="toolTip">
-              <string/>
-             </property>
-             <property name="text">
-              <string>x</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="height_input">
-             <property name="placeholderText">
-              <string>Height</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <widget class="QComboBox" name="preset_combo">
-           <property name="placeholderText">
-            <string>Select Preset</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="apply_button">
-           <property name="text">
-            <string>Apply</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QGroupBox" name="screenshot_group">
-        <property name="title">
-         <string>Screenshot</string>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QPushButton" name="screenshot_button">
-           <property name="text">
-            <string>Take Screenshot</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="save_button">
-           <property name="text">
-            <string>Save As...</string>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -154,19 +183,15 @@
      </layout>
     </item>
     <item>
-     <widget class="QLabel" name="screenshot_label">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QGroupBox" name="log_group">
+      <property name="title">
+       <string>Log</string>
       </property>
-      <property name="text">
-       <string>Screenshot Preview</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QListWidget" name="log_list"/>
+       </item>
+      </layout>
      </widget>
     </item>
    </layout>
