@@ -1,7 +1,7 @@
 import sys
 import ctypes
 from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox)
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QEvent
 import win32gui
 import win32process
 import win32con
@@ -18,10 +18,12 @@ class WindowResizer(QMainWindow):
         # Input fields for title and process name
         self.title_input = QLineEdit(self)
         self.title_input.setPlaceholderText("Enter Window Title")
+        self.title_input.editingFinished.connect(self.update_current_resolution)
         layout.addWidget(self.title_input)
 
         self.process_input = QLineEdit(self)
         self.process_input.setPlaceholderText("Enter Process Name")
+        self.process_input.editingFinished.connect(self.update_current_resolution)
         layout.addWidget(self.process_input)
 
         # Label to show current resolution
@@ -108,8 +110,9 @@ class WindowResizer(QMainWindow):
 
         if hwnd:
             rect = win32gui.GetWindowRect(hwnd)
-            self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
+            # self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
             win32gui.MoveWindow(hwnd, rect[0], rect[1], width, height, True)
+            self.update_current_resolution()
         else:
             QMessageBox.warning(self, "Window Not Found", "Could not find the target window.")
 
@@ -127,6 +130,22 @@ class WindowResizer(QMainWindow):
         hwnds = []
         win32gui.EnumWindows(callback, hwnds)
         return hwnds[0] if hwnds else None
+
+    def update_current_resolution(self):
+        title = self.title_input.text()
+        process_name = self.process_input.text()
+
+        hwnd = None
+        if title:
+            hwnd = win32gui.FindWindow(None, title)
+        if not hwnd and process_name:
+            hwnd = self.find_window_by_process(process_name)
+
+        if hwnd:
+            rect = win32gui.GetWindowRect(hwnd)
+            self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
+        else:
+            self.current_resolution_label.setText("Current Resolution: N/A")
 
 
 def is_admin():
