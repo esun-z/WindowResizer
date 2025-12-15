@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Cached screenshot
+screenshot.bmp

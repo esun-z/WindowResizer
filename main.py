@@ -1,18 +1,22 @@
 import sys
 import ctypes
-from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox, QHBoxLayout)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox, QHBoxLayout, QFileDialog)
 from PySide6.QtCore import Qt, QEvent
+from PySide6.QtGui import QPixmap
 import win32gui
 import win32process
 import win32con
 import os
 import win32api
+import win32ui
+import win32print
+
 
 class WindowResizer(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Window Resizer")
-        self.setGeometry(100, 100, 400, 300)
+        self.setGeometry(100, 100, 600, 400)  # Adjusted width for screenshot preview
 
         # Main layout
         layout = QVBoxLayout()
@@ -38,6 +42,22 @@ class WindowResizer(QMainWindow):
         # Label to show current resolution
         self.current_resolution_label = QLabel("Current Resolution: N/A", self)
         layout.addWidget(self.current_resolution_label)
+
+        # Screenshot preview and buttons
+        self.screenshot_label = QLabel("Screenshot Preview", self)
+        self.screenshot_label.setFixedSize(200, 150)
+        layout.addWidget(self.screenshot_label)
+
+        screenshot_buttons_layout = QHBoxLayout()
+        self.screenshot_button = QPushButton("Take Screenshot", self)
+        self.screenshot_button.clicked.connect(self.take_screenshot)
+        screenshot_buttons_layout.addWidget(self.screenshot_button)
+
+        self.save_button = QPushButton("Save As...", self)
+        self.save_button.clicked.connect(self.save_screenshot)
+        screenshot_buttons_layout.addWidget(self.save_button)
+
+        layout.addLayout(screenshot_buttons_layout)
 
         # Input fields for target resolution
         self.width_input = QLineEdit(self)
@@ -77,6 +97,9 @@ class WindowResizer(QMainWindow):
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
+
+        # Placeholder for screenshot pixmap
+        self.screenshot_pixmap = None
 
     def apply_preset(self):
         presets = {
@@ -177,6 +200,76 @@ class WindowResizer(QMainWindow):
             self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
         else:
             self.current_resolution_label.setText("Current Resolution: N/A")
+
+    def take_screenshot(self):
+        title = self.title_input.text()
+        process_name = self.process_input.text()
+
+        hwnd = None
+        if title:
+            hwnd = win32gui.FindWindow(None, title)
+        if not hwnd and process_name:
+            hwnd = self.find_window_by_process(process_name)
+
+        if not hwnd:
+            QMessageBox.warning(self, "Window Not Found", "Could not find the target window.")
+            return
+
+        # Get client area size
+        client_rect = win32gui.GetClientRect(hwnd)
+        width = client_rect[2] - client_rect[0]
+        height = client_rect[3] - client_rect[1]
+
+        if width <= 0 or height <= 0:
+            QMessageBox.warning(self, "Invalid Window", "Client area has zero size.")
+            return
+
+        try:
+            # Create a compatible DC (with screen, not window!)
+            screen_dc = win32gui.GetDC(0)  # Screen DC
+            mem_dc = win32ui.CreateDCFromHandle(screen_dc)
+            compatible_dc = mem_dc.CreateCompatibleDC()
+
+            # Create compatible bitmap
+            bitmap = win32ui.CreateBitmap()
+            bitmap.CreateCompatibleBitmap(mem_dc, width, height)
+            compatible_dc.SelectObject(bitmap)
+
+            # Use PrintWindow to render client area into memory DC
+            # PW_CLIENTONLY = 1 | PW_RENDERFULLCONTENT = 2 => 3
+            result = ctypes.windll.user32.PrintWindow(hwnd, compatible_dc.GetSafeHdc(), 3)
+
+            if not result:
+                QMessageBox.warning(self, "Screenshot Failed", "PrintWindow failed to capture the client area.")
+                return
+
+            # Save to file
+            bitmap.SaveBitmapFile(compatible_dc, "screenshot.bmp")
+
+            # Load into QLabel
+            self.screenshot_pixmap = QPixmap("screenshot.bmp")
+            self.screenshot_label.setPixmap(
+                self.screenshot_pixmap.scaled(
+                    self.screenshot_label.size(),
+                    Qt.KeepAspectRatio,
+                    Qt.SmoothTransformation
+                )
+            )
+
+        finally:
+            # Cleanup resources
+            win32gui.DeleteObject(bitmap.GetHandle())
+            compatible_dc.DeleteDC()
+            mem_dc.DeleteDC()
+            win32gui.ReleaseDC(0, screen_dc)
+
+    def save_screenshot(self):
+        if self.screenshot_pixmap:
+            file_path, _ = QFileDialog.getSaveFileName(self, "Save Screenshot", "", "Images (*.png *.xpm *.jpg *.bmp)")
+            if file_path:
+                self.screenshot_pixmap.save(file_path)
+        else:
+            QMessageBox.warning(self, "No Screenshot", "No screenshot available to save.")
 
 
 def is_admin():
