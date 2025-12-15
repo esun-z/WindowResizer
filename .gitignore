@@ -11,3 +11,6 @@ wheels/
 
 # Cached screenshot
 screenshot.bmp
+
+# generated ui files
+ui_*.py
