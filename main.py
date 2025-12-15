@@ -1,6 +1,6 @@
 import sys
 import ctypes
-from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox)
+from PySide6.QtWidgets import (QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget, QComboBox, QMessageBox, QHBoxLayout)
 from PySide6.QtCore import Qt, QEvent
 import win32gui
 import win32process
@@ -18,15 +18,22 @@ class WindowResizer(QMainWindow):
         layout = QVBoxLayout()
 
         # Input fields for title and process name
+        input_layout = QVBoxLayout()
+
         self.title_input = QLineEdit(self)
         self.title_input.setPlaceholderText("Enter Window Title")
-        self.title_input.editingFinished.connect(self.update_current_resolution)
-        layout.addWidget(self.title_input)
+        input_layout.addWidget(self.title_input)
 
         self.process_input = QLineEdit(self)
         self.process_input.setPlaceholderText("Enter Process Name")
-        self.process_input.editingFinished.connect(self.update_current_resolution)
-        layout.addWidget(self.process_input)
+        input_layout.addWidget(self.process_input)
+
+        layout.addLayout(input_layout)
+
+        # Single Detect button
+        self.detect_button = QPushButton("Detect", self)
+        self.detect_button.clicked.connect(self.update_current_resolution)
+        layout.addWidget(self.detect_button)
 
         # Label to show current resolution
         self.current_resolution_label = QLabel("Current Resolution: N/A", self)
