@@ -6,6 +6,7 @@ import win32gui
 import win32process
 import win32con
 import os
+import win32api
 
 class WindowResizer(QMainWindow):
     def __init__(self):
@@ -124,7 +125,7 @@ class WindowResizer(QMainWindow):
 
             _, pid = win32process.GetWindowThreadProcessId(hwnd)
             try:
-                handle = win32process.OpenProcess(
+                handle = win32api.OpenProcess(
                     win32con.PROCESS_QUERY_INFORMATION | win32con.PROCESS_VM_READ, False, pid
                 )
                 exe_path = win32process.GetModuleFileNameEx(handle, 0)
