@@ -9,6 +9,12 @@ dependencies = [
     "pywin32>=311",
 ]
 
+[project.optional-dependencies]
+
+packaging = [
+    "pyinstaller"
+]
+
 [[tool.uv.index]]
 url = "https://mirrors.aliyun.com/pypi/simple/"
 default = true

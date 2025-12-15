@@ -14,3 +14,11 @@ screenshot.bmp
 
 # generated ui files
 ui_*.py
+
+# packaging
+dist/
+build/
+*.spec
+*.ico
+icon.png
+*.qm

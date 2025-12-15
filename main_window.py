@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import (QMainWindow, QListWidgetItem, QMessageBox, QFileDialog)
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (QMainWindow, QListWidgetItem, QFileDialog)
+from PySide6.QtCore import Qt, QCoreApplication
 from PySide6.QtGui import QPixmap, QColor
 import win32gui
 import win32ui
@@ -47,9 +47,9 @@ class MainWindow(QMainWindow, ui):
             width, height = presets[preset]
             self.width_input.setText(str(width))
             self.height_input.setText(str(height))
-            self.log(f"Applied preset: {preset} ({width}x{height})")
+            self.log(self.tr("Applied preset: {} ({}x{})").format(preset, width, height))
         else:
-            self.log(f"Preset '{preset}' not found.", LogLevel.WARNING)
+            self.log(self.tr("Preset {} not found.").format(preset), LogLevel.WARNING)
 
     def apply_resolution(self):
         title = self.title_input.text()
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow, ui):
         height = self.height_input.text()
 
         if not width.isdigit() or not height.isdigit():
-            self.log("Width and Height must be numeric values.", LogLevel.ERROR)
+            self.log(self.tr("Width and Height must be numeric values."), LogLevel.ERROR)
             return
 
         target_width, target_height = int(width), int(height)
@@ -91,7 +91,7 @@ class MainWindow(QMainWindow, ui):
             win32gui.MoveWindow(hwnd, rect[0], rect[1], new_width, new_height, True)
             self.update_current_resolution()
         else:
-            self.log("Could not find the target window.", LogLevel.ERROR)
+            self.log(self.tr("Could not find the target window."), LogLevel.ERROR)
 
     def update_current_resolution(self):
         title = self.title_input.text()
@@ -105,11 +105,12 @@ class MainWindow(QMainWindow, ui):
 
         if hwnd:
             rect = win32gui.GetClientRect(hwnd)
-            self.current_resolution_label.setText(f"Current Resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
-            self.log(f"Current resolution: {rect[2] - rect[0]}x{rect[3] - rect[1]}")
+            label_str = self.tr("Current Resolution: {}x{}").format(rect[2] - rect[0], rect[3] - rect[1])
+            self.current_resolution_label.setText(label_str)
+            self.log(label_str)
         else:
-            self.current_resolution_label.setText("Current Resolution: N/A")
-            self.log("Could not find the target window.", LogLevel.WARNING)
+            self.current_resolution_label.setText(self.tr("Current Resolution: N/A"))
+            self.log(self.tr("Could not find the target window."), LogLevel.WARNING)
 
     def take_screenshot(self):
         title = self.title_input.text()
@@ -122,7 +123,7 @@ class MainWindow(QMainWindow, ui):
             hwnd = find_window_by_process(process_name)
 
         if not hwnd:
-            self.log("Could not find the target window for screenshot.", LogLevel.ERROR)
+            self.log(self.tr("Could not find the target window for screenshot."), LogLevel.ERROR)
             return
 
         # Get client area size
@@ -131,7 +132,7 @@ class MainWindow(QMainWindow, ui):
         height = client_rect[3] - client_rect[1]
 
         if width <= 0 or height <= 0:
-            self.log("Client area has zero size.", LogLevel.ERROR)
+            self.log(self.tr("Client area has zero size."), LogLevel.ERROR)
             return
 
         try:
@@ -150,7 +151,7 @@ class MainWindow(QMainWindow, ui):
             result = ctypes.windll.user32.PrintWindow(hwnd, compatible_dc.GetSafeHdc(), 3)
 
             if not result:
-                self.log("PrintWindow failed to capture the client area.", LogLevel.ERROR)
+                self.log(self.tr("PrintWindow failed to capture the client area."), LogLevel.ERROR)
                 return
 
             # Save to file
@@ -166,7 +167,7 @@ class MainWindow(QMainWindow, ui):
                 )
             )
 
-            self.log("Screenshot taken successfully.")
+            self.log(self.tr("Screenshot taken successfully."))
 
         finally:
             # Cleanup resources
@@ -177,12 +178,12 @@ class MainWindow(QMainWindow, ui):
 
     def save_screenshot(self):
         if self.screenshot_pixmap:
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save Screenshot", "", "Images (*.png *.xpm *.jpg *.bmp)")
+            file_path, _ = QFileDialog.getSaveFileName(self, self.tr("Save Screenshot"), "", self.tr("Images (*.png *.xpm *.jpg *.bmp)"))
             if file_path:
                 self.screenshot_pixmap.save(file_path)
-                self.log(f"Screenshot saved to {file_path}.")
+                self.log(self.tr("Screenshot saved to {}").format(file_path))
         else:
-            self.log("No screenshot available to save.", LogLevel.WARNING)
+            self.log(self.tr("No screenshot available to save."), LogLevel.WARNING)
 
 if __name__ == "__main__":
     import sys

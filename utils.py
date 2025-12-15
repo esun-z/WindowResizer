@@ -4,6 +4,7 @@ import win32gui
 import win32process
 import win32api
 import win32con
+import sys
 
 def is_admin():
     """Check if the application is running with administrator privileges."""
@@ -33,3 +34,12 @@ def find_window_by_process(process_name):
     hwnds = []
     win32gui.EnumWindows(callback, hwnds)
     return hwnds[0] if hwnds else None
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)

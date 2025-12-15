@@ -1,8 +1,10 @@
 from PySide6.QtWidgets import QApplication
-from main_window import MainWindow
-from utils import is_admin
+from PySide6.QtCore import QTranslator, QLocale, QLibraryInfo
 import sys
 import ctypes
+import os
+from main_window import MainWindow
+from utils import is_admin, resource_path
 
 def main():
     # Check if the application is running as an administrator
@@ -14,6 +16,14 @@ def main():
 
     # Continue with the application if already running as admin
     app = QApplication(sys.argv)
+
+    locale = QLocale.system().name()
+    if locale.startswith("zh"):
+        translator = QTranslator()
+        qm_file = resource_path(os.path.join("i18n", "zh_CN.qm"))
+        if translator.load(qm_file):
+            app.installTranslator(translator)
+
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
