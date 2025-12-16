@@ -18,7 +18,6 @@ ui_*.py
 # packaging
 dist/
 build/
-*.spec
 *.ico
 icon.png
 *.qm
