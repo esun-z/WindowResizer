@@ -74,7 +74,7 @@ To create a standalone executable:
 The executable will be available in the `dist/WindowResizer/` directory.
 
 ## License
-This project is licensed under the GNU General Public License v3.0.
+This project is licensed under the GNU General Public License v3.0. See the `LICENSE` file for details.
 
 ## Contributing
 Contributions are welcome! Feel free to submit issues or pull requests to improve the project.
