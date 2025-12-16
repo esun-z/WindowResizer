@@ -13,16 +13,22 @@ Window Resizer is a Python-based desktop application that allows users to detect
 
 ## Installation
 
+Astral uv is used for dependency management and task running. See [uv installation](https://docs.astral.sh/uv/#installation) for details if you don't have it installed.
+
 1. Clone the repository or download the source code.
-2. Sync dependencies using uv:
+2. Go to the project directory:
+   ```bash
+   cd WindowResizer
+   ```
+3. Sync dependencies using uv:
    ```bash
    uv sync
    ```
-3. Compile UI forms and translations
+4. Compile UI forms and translations
    ```bash
    uv run prebuild.py
    ```
-4. Run the application
+5. Run the application
    ```bash
    uv run main.py
    ```
@@ -42,7 +48,6 @@ Use the graphical interface to:
 - `presets.py`: Stores predefined resolution presets.
 - `utils.py`: Utility functions, including administrative privilege checks and resource path handling.
 - `i18n/`: Contains translation files for localization (e.g., `zh_CN.qm`).
-- `build/` and `dist/`: Directory for build artifacts (e.g., `.exe` files).
 
 ## Dependencies
 - **PySide6**: For creating the graphical user interface.
@@ -53,14 +58,23 @@ Use the graphical interface to:
 The application supports localization. Currently, a Chinese translation (`zh_CN.qm`) is included. The application automatically loads the appropriate translation based on the system locale.
 
 ## Building Executables
-To create a standalone executable, use PyInstaller:
-```bash
-pyinstaller WindowResizer.spec
-```
+To create a standalone executable:
+1. run prebuild.py to compile UI and translations
+   ```bash
+   uv run prebuild.py
+   ```
+2. install dependencies for packaging
+   ```bash
+   uv sync --dev
+   ```
+3. use PyInstaller to build the executable
+    ```bash
+    pyinstaller WindowResizer.spec
+    ```
 The executable will be available in the `dist/WindowResizer/` directory.
 
 ## License
-This project is licensed under the MIT License. See the `LICENSE` file for details.
+This project is licensed under the GNU General Public License v3.0.
 
 ## Contributing
 Contributions are welcome! Feel free to submit issues or pull requests to improve the project.
