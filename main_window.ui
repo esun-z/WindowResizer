@@ -79,6 +79,13 @@
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="current_window_size_label">
+             <property name="text">
+              <string>Current Window Size: N/A</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QLabel" name="target_resolution_label">
              <property name="text">
               <string>Target Resolution:</string>
@@ -108,6 +115,13 @@
               <widget class="QLineEdit" name="height_input">
                <property name="placeholderText">
                 <string>Height</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="set_window_size_checkbox">
+               <property name="text">
+                <string>Set Window Size</string>
                </property>
               </widget>
              </item>

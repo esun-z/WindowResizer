@@ -14,6 +14,11 @@ def compile_uis():
         py_file = out_dir / f"ui_{ui_file.stem}.py"
         run(["pyside6-uic", str(ui_file), "-o", str(py_file)])
 
+def update_translation_files():
+    ts_dir = Path("i18n")
+    for ts_file in ts_dir.glob("*.ts"):
+        run(["pyside6-lupdate", "main_window.ui", "main_window.py", "-ts", str(ts_file)])
+
 def compile_translations():
     ts_dir = Path("i18n")
     for ts_file in ts_dir.glob("*.ts"):
@@ -22,4 +27,5 @@ def compile_translations():
 
 if __name__ == "__main__":
     compile_uis()
+    update_translation_files()
     compile_translations()

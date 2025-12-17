@@ -72,23 +72,26 @@ class MainWindow(QMainWindow, ui):
         if hwnd:
             # Get current window and client area dimensions
             rect = win32gui.GetWindowRect(hwnd)
-            client_rect = win32gui.GetClientRect(hwnd)
+            if self.set_window_size_checkbox.isChecked():
+                win32gui.MoveWindow(hwnd, rect[0], rect[1], target_width, target_height, True)
+            else:
+                client_rect = win32gui.GetClientRect(hwnd)
 
-            outer_width = rect[2] - rect[0]
-            outer_height = rect[3] - rect[1]
-            client_width = client_rect[2] - client_rect[0]
-            client_height = client_rect[3] - client_rect[1]
+                outer_width = rect[2] - rect[0]
+                outer_height = rect[3] - rect[1]
+                client_width = client_rect[2] - client_rect[0]
+                client_height = client_rect[3] - client_rect[1]
 
-            # Calculate border and title bar sizes
-            border_width = (outer_width - client_width) // 2
-            title_bar_height = outer_height - client_height - border_width
+                # Calculate border and title bar sizes
+                border_width = (outer_width - client_width) // 2
+                title_bar_height = outer_height - client_height - border_width
 
-            # Calculate new outer dimensions
-            new_width = target_width + 2 * border_width
-            new_height = target_height + title_bar_height + border_width
+                # Calculate new outer dimensions
+                new_width = target_width + 2 * border_width
+                new_height = target_height + title_bar_height + border_width
 
-            # Move and resize the window
-            win32gui.MoveWindow(hwnd, rect[0], rect[1], new_width, new_height, True)
+                # Move and resize the window
+                win32gui.MoveWindow(hwnd, rect[0], rect[1], new_width, new_height, True)
             self.update_current_resolution()
         else:
             self.log(self.tr("Could not find the target window."), LogLevel.ERROR)
@@ -105,11 +108,15 @@ class MainWindow(QMainWindow, ui):
 
         if hwnd:
             rect = win32gui.GetClientRect(hwnd)
+            window_rect = win32gui.GetWindowRect(hwnd)
             label_str = self.tr("Current Resolution: {}x{}").format(rect[2] - rect[0], rect[3] - rect[1])
+            window_label_str = self.tr("Current Window Size: {}x{}").format(window_rect[2] - window_rect[0], window_rect[3] - window_rect[1])
             self.current_resolution_label.setText(label_str)
-            self.log(label_str)
+            self.current_window_size_label.setText(window_label_str)
+            self.log(label_str + self.tr("; ") + window_label_str)
         else:
             self.current_resolution_label.setText(self.tr("Current Resolution: N/A"))
+            self.current_window_size_label.setText(self.tr("Current Window Size: N/A"))
             self.log(self.tr("Could not find the target window."), LogLevel.WARNING)
 
     def take_screenshot(self):
